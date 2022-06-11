@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8' />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css"
+    integrity="sha256-5veQuRbWaECuYxwap/IOE/DAwNxgm4ikX7nrgsqYp88=" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"
+    integrity="sha256-XCdgoNaBjzkUaEJiauEq+85q/xi/2D4NcB3ZHwAapoM=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales-all.min.js"
+    integrity="sha256-GcByKJnun2NoPMzoBsuCb4O2MKiqJZLlHTw3PJeqSkI=" crossorigin="anonymous"></script>
+  <script src='vacances.js'></script>
+  <script>
+
+    function calculateEvent(vacances) {
+      var res = [];
+      if (vacances) {
+        for (var i = 0; i < vacances.length; i++) {
+          var tmp = vacances[i];
+          if (typeof tmp.date === 'string') {
+            res.push({
+              id: 'event' + i,
+              title: 'vacance ' + tmp.name,
+              start: tmp.date,
+              end: tmp.date
+            });
+          } else if (Array.isArray(tmp.date)) {
+            if (tmp.date.length === 2) {
+              if (typeof tmp.date[0] === 'string' && typeof tmp.date[1] === 'string') {
+                res.push({
+                  id: 'event' + i,
+                  title: 'vacance ' + tmp.name,
+                  start: tmp.date[0],
+                  end: tmp.date[1]
+                });
+              }
+            }
+          }
+
+        }
+      }
+      return res;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: calculateEvent(vacances)
+      });
+      calendar.render();
+    });
+
+  </script>
+</head>
+
+<body>
+  <div id='calendar'></div>
+</body>
+
+</html>

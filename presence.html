@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8' />
+
+  <script src="https://unpkg.com/vue@3"></script>
+  <script src='vacances.js'></script>
+  <script>
+
+    /*var vacances = [
+      { "name": "Nathan LaFromboise", "date": "2022-06-01" },
+      { "name": "Nathan LaFromboise", "date": "2022-06-05" },
+      { "name": "Nathan LaFromboise", "date": ["2022-06-08", "2022-06-10"] },
+      { "name": "Raoul LaRue", "date": "2022-06-07" },
+    ]*/
+
+    /*function calculateEvent(vacances) {
+      var res = [];
+      if (vacances) {
+        for (var i = 0; i < vacances.length; i++) {
+          var tmp = vacances[i];
+          if (typeof tmp.date === 'string') {
+            res.push({
+              id: 'event' + i,
+              title: 'vacance ' + tmp.name,
+              start: tmp.date,
+              end: tmp.date
+            });
+          } else if (Array.isArray(tmp.date)) {
+            if (tmp.date.length === 2) {
+              if (typeof tmp.date[0] === 'string' && typeof tmp.date[1] === 'string') {
+                res.push({
+                  id: 'event' + i,
+                  title: 'vacance ' + tmp.name,
+                  start: tmp.date[0],
+                  end: tmp.date[1]
+                });
+              }
+            }
+          }
+
+        }
+      }
+      return res;
+    }
+
+    /*document.addEventListener('DOMContentLoaded', function () {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: calculateEvent(vacances)
+      });
+      calendar.render();
+    });*/
+    function addJours(item, map) {
+      if (item.jours) {
+        if (Array.isArray(item.jours)) {
+          for (let j = 0; j < item.jours.length; j++) {
+            map.set(item.jours[j], item.place);
+          }
+        }
+      }
+    }
+
+    function normalise(presence) {
+      var res = [];
+      if (presence) {
+        for (var i = 0; i < presence.length; i++) {
+          var tmp = presence[i];
+          var trouve = res.find(elt => elt.name === tmp.name);
+          if (trouve) {
+            const map1 = trouve.jours;
+            addJours(tmp, map1);
+          } else {
+            const map1 = new Map();
+            addJours(tmp, map1);
+            res.push({
+              name: tmp.name,
+              jours: map1
+            });
+          }
+        }
+      }
+      return res;
+    }
+
+    function sortSet(set) {
+      const entries = [];
+      for (const member of set) {
+        entries.push(member);
+      }
+      set.clear();
+      for (const entry of entries.sort()) {
+        set.add(entry);
+      }
+      return set;
+    };
+
+    function addPlacesLibres(presence2) {
+      var map = new Map();
+      var listePlaces = new Set();
+      if (presence2) {
+        for (var i = 0; i < presence2.length; i++) {
+          const tmp = presence2[i];
+          for (const [key, value] of tmp.jours) {
+            listePlaces.add(value);
+          }
+        }
+        listePlaces = sortSet(listePlaces);
+
+        for (i = 1; i <= 5; i++) {
+          let set = new Set();
+          listePlaces.forEach(item => set.add(item));
+          for (var j = 0; j < presence2.length; j++) {
+            const tmp = presence2[j];
+            if (tmp.jours.has(i)) {
+              set.delete(tmp.jours.get(i));
+            }
+          }
+          let s = '';
+          for (let item of set) {
+            if (s.length > 0) {
+              s += ',';
+            }
+            s += item;
+          }
+          map.set(i, s);
+        }
+      }
+      return map;
+    }
+
+    var presence2 = normalise(presence);
+    console.log(presence2);
+
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <!--<span>{{ message }}</span><br />
+    <li v-for="(item, index) in items">
+      {{ parentMessage }} - {{ index }} - {{ item.name }}
+    </li><br />-->
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Lundi</th>
+          <th>Mardi</th>
+          <th>Mercredi</th>
+          <th>Jeudi</th>
+          <th>Vendredi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in items" :key="item.name">
+          <td>{{item.name}}</td>
+          <td>{{getJour(item,1)}}</td>
+          <td>{{getJour(item,2)}}</td>
+          <td>{{getJour(item,3)}}</td>
+          <td>{{getJour(item,4)}}</td>
+          <td>{{getJour(item,5)}}</td>
+        </tr>
+        <tr>
+          <td>Places libres</td>
+          <td>{{placesLibres.get(1)}}</td>
+          <td>{{placesLibres.get(2)}}</td>
+          <td>{{placesLibres.get(3)}}</td>
+          <td>{{placesLibres.get(4)}}</td>
+          <td>{{placesLibres.get(5)}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const { createApp } = Vue
+
+    createApp({
+      data() {
+        return {
+          message: 'Hello Vue!',
+          items: presence2,
+          placesLibres: addPlacesLibres(presence2)
+        }
+      },
+      methods: {
+
+        getJour(item, noJour) {
+          if (item && item.jours.has(noJour)) {
+            return item.jours.get(noJour);
+          } else {
+            return '';
+          }
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+
+</html>
