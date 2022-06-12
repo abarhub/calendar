@@ -3,56 +3,22 @@
 
 <head>
   <meta charset='utf-8' />
-
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3"></script>
   <script src='vacances.js'></script>
   <script>
-
-    /*var vacances = [
-      { "name": "Nathan LaFromboise", "date": "2022-06-01" },
-      { "name": "Nathan LaFromboise", "date": "2022-06-05" },
-      { "name": "Nathan LaFromboise", "date": ["2022-06-08", "2022-06-10"] },
-      { "name": "Raoul LaRue", "date": "2022-06-07" },
-    ]*/
-
-    /*function calculateEvent(vacances) {
-      var res = [];
-      if (vacances) {
-        for (var i = 0; i < vacances.length; i++) {
-          var tmp = vacances[i];
-          if (typeof tmp.date === 'string') {
-            res.push({
-              id: 'event' + i,
-              title: 'vacance ' + tmp.name,
-              start: tmp.date,
-              end: tmp.date
-            });
-          } else if (Array.isArray(tmp.date)) {
-            if (tmp.date.length === 2) {
-              if (typeof tmp.date[0] === 'string' && typeof tmp.date[1] === 'string') {
-                res.push({
-                  id: 'event' + i,
-                  title: 'vacance ' + tmp.name,
-                  start: tmp.date[0],
-                  end: tmp.date[1]
-                });
-              }
-            }
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clifford: '#da373d',
           }
-
         }
       }
-      return res;
     }
+  </script>
+  <script>
 
-    /*document.addEventListener('DOMContentLoaded', function () {
-      var calendarEl = document.getElementById('calendar');
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        events: calculateEvent(vacances)
-      });
-      calendar.render();
-    });*/
     function addJours(item, map) {
       if (item.jours) {
         if (Array.isArray(item.jours)) {
@@ -132,47 +98,44 @@
     }
 
     var presence2 = normalise(presence);
-    console.log(presence2);
 
   </script>
 </head>
 
 <body>
   <div id="app">
-    <!--<span>{{ message }}</span><br />
-    <li v-for="(item, index) in items">
-      {{ parentMessage }} - {{ index }} - {{ item.name }}
-    </li><br />-->
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Lundi</th>
-          <th>Mardi</th>
-          <th>Mercredi</th>
-          <th>Jeudi</th>
-          <th>Vendredi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(item, index) in items" :key="item.name">
-          <td>{{item.name}}</td>
-          <td>{{getJour(item,1)}}</td>
-          <td>{{getJour(item,2)}}</td>
-          <td>{{getJour(item,3)}}</td>
-          <td>{{getJour(item,4)}}</td>
-          <td>{{getJour(item,5)}}</td>
-        </tr>
-        <tr>
-          <td>Places libres</td>
-          <td>{{placesLibres.get(1)}}</td>
-          <td>{{placesLibres.get(2)}}</td>
-          <td>{{placesLibres.get(3)}}</td>
-          <td>{{placesLibres.get(4)}}</td>
-          <td>{{placesLibres.get(5)}}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="grid place-items-center h-screen">
+      <table class="table-auto w-1/4">
+        <thead>
+          <tr>
+            <th class="text-center">Nom</th>
+            <th class="text-center">Lundi</th>
+            <th class="text-center">Mardi</th>
+            <th class="text-center">Mercredi</th>
+            <th class="text-center">Jeudi</th>
+            <th class="text-center">Vendredi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in items" :key="item.name" class="bg-yellow-400">
+            <td class="border border-slate-600">{{item.name}}</td>
+            <td class="text-center border border-slate-600">{{getJour(item,1)}}</td>
+            <td class="text-center border border-slate-600">{{getJour(item,2)}}</td>
+            <td class="text-center border border-slate-600">{{getJour(item,3)}}</td>
+            <td class="text-center border border-slate-600">{{getJour(item,4)}}</td>
+            <td class="text-center border border-slate-600">{{getJour(item,5)}}</td>
+          </tr>
+          <tr class="bg-yellow-500">
+            <td class="border border-slate-600">Places libres</td>
+            <td class="text-center border border-slate-600">{{placesLibres.get(1)}}</td>
+            <td class="text-center border border-slate-600">{{placesLibres.get(2)}}</td>
+            <td class="text-center border border-slate-600">{{placesLibres.get(3)}}</td>
+            <td class="text-center border border-slate-600">{{placesLibres.get(4)}}</td>
+            <td class="text-center border border-slate-600">{{placesLibres.get(5)}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
