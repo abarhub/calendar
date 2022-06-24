@@ -20,32 +20,40 @@
   <script>
 
     function addJours(item, map) {
-      if (item.jours) {
-        if (Array.isArray(item.jours)) {
-          for (let j = 0; j < item.jours.length; j++) {
-            map.set(item.jours[j], item.place);
+      if (item.jour) {
+        if (Array.isArray(item.jour)) {
+          for (let j = 0; j < item.jour.length; j++) {
+            map.set(item.jour[j], item.place);
           }
         }
       }
     }
 
-    function normalise(presence) {
+    function normalise(personnes) {
       var res = [];
-      if (presence) {
-        for (var i = 0; i < presence.length; i++) {
-          var tmp = presence[i];
-          var trouve = res.find(elt => elt.name === tmp.name);
-          if (trouve) {
-            const map1 = trouve.jours;
-            addJours(tmp, map1);
-          } else {
-            const map1 = new Map();
-            addJours(tmp, map1);
-            res.push({
-              name: tmp.name,
-              jours: map1
-            });
+      if (personnes) {
+        for (var i = 0; i < personnes.length; i++) {
+          var tmp = personnes[i];
+          if (tmp.presence && tmp.presence.length > 0) {
+            for (var j = 0; j < tmp.presence.length; j++) {
+              var tmp2 = tmp.presence[j];
+              if (tmp2.jour && tmp2.place) {
+                var trouve = res.find(elt => elt.name === tmp.name);
+                if (trouve) {
+                  const map1 = trouve.jours;
+                  addJours(tmp2, map1);
+                } else {
+                  const map1 = new Map();
+                  addJours(tmp2, map1);
+                  res.push({
+                    name: tmp.name,
+                    jours: map1
+                  });
+                }
+              }
+            }
           }
+
         }
       }
       return res;
@@ -63,12 +71,12 @@
       return set;
     };
 
-    function addPlacesLibres(presence2) {
+    function addPlacesLibres(personnes2) {
       var map = new Map();
       var listePlaces = new Set();
-      if (presence2) {
-        for (var i = 0; i < presence2.length; i++) {
-          const tmp = presence2[i];
+      if (personnes2) {
+        for (var i = 0; i < personnes2.length; i++) {
+          const tmp = personnes2[i];
           for (const [key, value] of tmp.jours) {
             listePlaces.add(value);
           }
@@ -78,8 +86,8 @@
         for (i = 1; i <= 5; i++) {
           let set = new Set();
           listePlaces.forEach(item => set.add(item));
-          for (var j = 0; j < presence2.length; j++) {
-            const tmp = presence2[j];
+          for (var j = 0; j < personnes2.length; j++) {
+            const tmp = personnes2[j];
             if (tmp.jours.has(i)) {
               set.delete(tmp.jours.get(i));
             }
@@ -97,7 +105,7 @@
       return map;
     }
 
-    var presence2 = normalise(presence);
+    var personnes2 = normalise(personnes);
 
   </script>
 </head>
@@ -117,7 +125,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in items" :key="item.name" class="bg-yellow-400">
+          <tr v-for="(item, index) in items" :key="item.name" class="bg-blue-200">
             <td class="border border-slate-600">{{item.name}}</td>
             <td class="text-center border border-slate-600">{{getJour(item,1)}}</td>
             <td class="text-center border border-slate-600">{{getJour(item,2)}}</td>
@@ -125,7 +133,7 @@
             <td class="text-center border border-slate-600">{{getJour(item,4)}}</td>
             <td class="text-center border border-slate-600">{{getJour(item,5)}}</td>
           </tr>
-          <tr class="bg-yellow-500">
+          <tr class="bg-blue-300">
             <td class="border border-slate-600">Places libres</td>
             <td class="text-center border border-slate-600">{{placesLibres.get(1)}}</td>
             <td class="text-center border border-slate-600">{{placesLibres.get(2)}}</td>
@@ -145,8 +153,8 @@
       data() {
         return {
           message: 'Hello Vue!',
-          items: presence2,
-          placesLibres: addPlacesLibres(presence2)
+          items: personnes2,
+          placesLibres: addPlacesLibres(personnes2)
         }
       },
       methods: {

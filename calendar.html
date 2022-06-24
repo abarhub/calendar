@@ -3,6 +3,8 @@
 
 <head>
   <meta charset='utf-8' />
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css"
     integrity="sha256-5veQuRbWaECuYxwap/IOE/DAwNxgm4ikX7nrgsqYp88=" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"
@@ -12,31 +14,47 @@
   <script src='vacances.js'></script>
   <script>
 
-    function calculateEvent(vacances) {
+    function calculateEvent(personnes) {
       var res = [];
-      if (vacances) {
-        for (var i = 0; i < vacances.length; i++) {
-          var tmp = vacances[i];
-          if (typeof tmp.date === 'string') {
-            res.push({
-              id: 'event' + i,
-              title: 'vacance ' + tmp.name,
-              start: tmp.date,
-              end: tmp.date
-            });
-          } else if (Array.isArray(tmp.date)) {
-            if (tmp.date.length === 2) {
-              if (typeof tmp.date[0] === 'string' && typeof tmp.date[1] === 'string') {
-                res.push({
-                  id: 'event' + i,
+      if (personnes) {
+        let nb = 1;
+        for (var i = 0; i < personnes.length; i++) {
+          var tmp = personnes[i];
+          if (tmp.vacances && tmp.vacances.length > 0) {
+            for (var j = 0; j < tmp.vacances.length; j++) {
+              var tmp2 = tmp.vacances[j];
+              var event;
+              if (typeof tmp2 === 'string') {
+                event = {
+                  id: 'event' + nb,
                   title: 'vacance ' + tmp.name,
-                  start: tmp.date[0],
-                  end: tmp.date[1]
-                });
+                  start: tmp2,
+                  end: tmp2
+                }
+                nb++;
+                if (tmp.color) {
+                  event.color = tmp.color;
+                }
+                res.push(event);
+              } else if (Array.isArray(tmp2)) {
+                if (tmp2.length === 2) {
+                  if (typeof tmp2[0] === 'string' && typeof tmp2[1] === 'string') {
+                    event = {
+                      id: 'event' + nb,
+                      title: 'vacance ' + tmp.name,
+                      start: tmp2[0],
+                      end: tmp2[1]
+                    };
+                    if (tmp.color) {
+                      event.color = tmp.color;
+                    }
+                    nb++;
+                    res.push(event);
+                  }
+                }
               }
             }
           }
-
         }
       }
       return res;
@@ -46,7 +64,16 @@
       var calendarEl = document.getElementById('calendar');
       var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        events: calculateEvent(vacances)
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          //right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,list'
+          //right: 'dayGridMonth'
+        },
+        themeSystem: 'bootstrap5',
+        locale: 'fr',
+        events: calculateEvent(personnes)
       });
       calendar.render();
     });
@@ -55,7 +82,10 @@
 </head>
 
 <body>
-  <div id='calendar'></div>
+  <div class="container">
+    <div ><h1 class="text-center">Calendrier</h1></div>
+    <div id='calendar'></div>
+  </div>
 </body>
 
 </html>
