@@ -11,8 +11,12 @@
     integrity="sha256-XCdgoNaBjzkUaEJiauEq+85q/xi/2D4NcB3ZHwAapoM=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales-all.min.js"
     integrity="sha256-GcByKJnun2NoPMzoBsuCb4O2MKiqJZLlHTw3PJeqSkI=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.4.0/build/global/luxon.min.js"
+      integrity="sha256-DIsAGD2EF8Qq2PCH9yzX/yt9FliJfWf+aGcdgR6tKwo=" crossorigin="anonymous"></script>
   <script src='vacances.js'></script>
   <script>
+
+const DateTime = luxon.DateTime;
 
     function calculateEvent(personnes) {
       var res = [];
@@ -39,11 +43,14 @@
               } else if (Array.isArray(tmp2)) {
                 if (tmp2.length === 2) {
                   if (typeof tmp2[0] === 'string' && typeof tmp2[1] === 'string') {
+                    let end=DateTime.fromISO(tmp2[1])
+                      .plus({ days: 1 })
+                      .toFormat('yyyy-MM-dd');
                     event = {
                       id: 'event' + nb,
                       title: 'vacance ' + tmp.name,
                       start: tmp2[0],
-                      end: tmp2[1]
+                      end: end
                     };
                     if (tmp.color) {
                       event.color = tmp.color;
