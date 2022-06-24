@@ -3,8 +3,15 @@
 
 <head>
   <meta charset='utf-8' />
+  <style>
+    .barre {
+      text-decoration: line-through;
+    }
+  </style>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/vue@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@2.4.0/build/global/luxon.min.js"
+    integrity="sha256-DIsAGD2EF8Qq2PCH9yzX/yt9FliJfWf+aGcdgR6tKwo=" crossorigin="anonymous"></script>
   <script src='vacances.js'></script>
   <script>
     tailwind.config = {
@@ -18,6 +25,8 @@
     }
   </script>
   <script>
+
+    const DateTime = luxon.DateTime;
 
     function addJours(item, map) {
       if (item.jour) {
@@ -44,10 +53,12 @@
                   addJours(tmp2, map1);
                 } else {
                   const map1 = new Map();
+                  const map2 = new Map();
                   addJours(tmp2, map1);
                   res.push({
                     name: tmp.name,
-                    jours: map1
+                    jours: map1,
+                    joursVacances: tmp.vacances
                   });
                 }
               }
@@ -71,6 +82,39 @@
       return set;
     };
 
+    function contient(listeVacances, jourATester) {
+      if (listeVacances && listeVacances.length > 0 && jourATester) {
+        for (let i = 0; i < listeVacances.length; i++) {
+          let periode = listeVacances[i];
+          if (typeof periode === 'string') {
+            if (periode === jourATester) {
+              return true;
+            }
+          } else if (Array.isArray(periode) && periode.length == 2) {
+            if (periode[0] === jourATester || periode[1] === jourATester) {
+              return true;
+            } else if (periode[0] <= jourATester && periode[1] >= jourATester) {
+              return true;
+            }
+          }
+        }
+        return false;
+      } else {
+        return false;
+      }
+    }
+
+    function contientJourVacance(personne, noJour) {
+      let dateJour = DateTime.now().startOf('week')
+        .plus({ days: noJour - 1 })
+        .toFormat('yyyy-MM-dd');
+      if (personne.joursVacances && personne.joursVacances.length > 0) {
+        return contient(personne.joursVacances, dateJour);
+      } else {
+        return false;
+      }
+    }
+
     function addPlacesLibres(personnes2) {
       var map = new Map();
       var listePlaces = new Set();
@@ -89,7 +133,9 @@
           for (var j = 0; j < personnes2.length; j++) {
             const tmp = personnes2[j];
             if (tmp.jours.has(i)) {
-              set.delete(tmp.jours.get(i));
+              if (!contientJourVacance(tmp, i)) {
+                set.delete(tmp.jours.get(i));
+              }
             }
           }
           let s = '';
@@ -105,13 +151,34 @@
       return map;
     }
 
+    function listeJourSemaine() {
+      let res = new Map();
+      let date = DateTime.now();
+      date = date.startOf('week');
+      for (let i = 1; i <= 5; i++) {
+        res.set(i, date);
+        console.log('date', i, date.toLocaleString());
+        date = date.plus({ days: 1 });
+      }
+      return res;
+    }
+
+    var dateJour = new Date().toISOString().substring(0, 10);
+
     var personnes2 = normalise(personnes);
+
+    var joursSemaine = listeJourSemaine();
+    console.log('joursSemaine', joursSemaine);
 
   </script>
 </head>
 
 <body>
   <div id="app">
+    <div class="flex flex-col justify-center items-center">
+      <h1>Présence cette semaine</h1>
+      <div>Date du jour : {{date}}</div>
+    </div>
     <div class="grid place-items-center h-screen">
       <table class="table-auto w-1/4">
         <thead>
@@ -127,11 +194,31 @@
         <tbody>
           <tr v-for="(item, index) in items" :key="item.name" class="bg-blue-200">
             <td class="border border-slate-600">{{item.name}}</td>
-            <td class="text-center border border-slate-600">{{getJour(item,1)}}</td>
-            <td class="text-center border border-slate-600">{{getJour(item,2)}}</td>
-            <td class="text-center border border-slate-600">{{getJour(item,3)}}</td>
-            <td class="text-center border border-slate-600">{{getJour(item,4)}}</td>
-            <td class="text-center border border-slate-600">{{getJour(item,5)}}</td>
+            <td class="text-center border border-slate-600">
+              <p :class="{ barre: isVacance(item,1) }">
+                {{getJour(item,1)}}
+              </p>
+            </td>
+            <td class="text-center border border-slate-600">
+              <p :class="{ barre: isVacance(item,2) }">
+                {{getJour(item,2)}}
+              </p>
+            </td>
+            <td class="text-center border border-slate-600">
+              <p :class="{ barre: isVacance(item,3) }">
+                {{getJour(item,3)}}
+              </p>
+            </td>
+            <td class="text-center border border-slate-600">
+              <p :class="{ barre: isVacance(item,4) }">
+                {{getJour(item,4)}}
+              </p>
+            </td>
+            <td class="text-center border border-slate-600">
+              <p :class="{ barre: isVacance(item,5) }">
+                {{getJour(item,5)}}
+              </p>
+            </td>
           </tr>
           <tr class="bg-blue-300">
             <td class="border border-slate-600">Places libres</td>
@@ -154,7 +241,8 @@
         return {
           message: 'Hello Vue!',
           items: personnes2,
-          placesLibres: addPlacesLibres(personnes2)
+          placesLibres: addPlacesLibres(personnes2),
+          date: dateJour
         }
       },
       methods: {
@@ -165,6 +253,9 @@
           } else {
             return '';
           }
+        },
+        isVacance(item, noJour) {
+          return contientJourVacance(item, noJour);
         }
       }
     }).mount('#app')
